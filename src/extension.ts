@@ -50,10 +50,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   for (let key in fullToken) {
     const value = String(fullToken[key as keyof typeof fullToken]);
-    const item = new vscode.CompletionItem(`${key}: ${value}`, 11);
+    const item = new vscode.CompletionItem(`antd-${key}: ${value}`, 11);
     item.insertText = key;
-    item.filterText = key;
-    item.sortText = key;
+    item.sortText = `a-${key}`;
+    item.filterText = `a-${key}`;
 
     const colorSpan = genMarkdownString(value);
     let documentContent: vscode.MarkdownString | string = "";
