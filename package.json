@@ -10,18 +10,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:antd-design-token.helloWorld",
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "antd-design-token.helloWorld",
-        "title": "Hello World"
-      }
-    ]
-  },
   "scripts": {
     "vscode:prepublish": "yarn run package",
     "compile": "webpack",
