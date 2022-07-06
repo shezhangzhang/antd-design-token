@@ -50,6 +50,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "antd-token-previewer": "^1.0.0-alpha.19"
+    "antd-token-previewer": "^1.0.0-alpha.19",
+    "rgb-hex": "^4.0.0"
   }
 }
