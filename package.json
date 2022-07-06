@@ -9,11 +9,16 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "antd"
+  ],
   "activationEvents": [
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
+  "icon": "assets/logo.png",
   "scripts": {
+    "publish": "vsce package",
     "vscode:prepublish": "yarn run package",
     "compile": "webpack",
     "watch": "webpack --watch",
@@ -43,5 +48,11 @@
   "dependencies": {
     "antd-token-previewer": "^1.0.0-alpha.19",
     "rgb-hex": "^4.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shezhangzhang/antd-design-token.git"
+  },
+  "license": "MIT",
+  "author": "shezhangzhang"
 }
