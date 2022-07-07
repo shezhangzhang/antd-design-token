@@ -52,14 +52,14 @@ export function activate(context: vscode.ExtensionContext) {
     const item = new vscode.CompletionItem(`antd-${key}: ${value}`, 11);
     item.insertText = key.includes("-") ? `['${key}']` : key;
 
-    const sortValue = value.padStart(3, "0");
+    const sortValue = value.padStart(5, "0");
     item.sortText = `a-${sortValue}-${key}`;
 
     const colorSpan = genMarkdownString(value);
     let documentContent: vscode.MarkdownString | string = "";
 
     documentContent = new vscode.MarkdownString(
-      `<h3>antd design token: ${key}</h3>${colorSpan}<code>${value}</code><br></br>`
+      `<h4>antd design token: ${key}</h4>${colorSpan}<code>${value}</code><br></br>`
     );
     documentContent.supportHtml = true;
 
