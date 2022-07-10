@@ -5,12 +5,39 @@ import { genMarkdownString } from "./utils";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
+let isActive = true;
+let disposeHover: vscode.Disposable;
+let disposeTyping: vscode.Disposable;
+
 export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
+  setUpAntdToken();
+
+  vscode.commands.registerCommand("antd-design-token.toggle", () => {
+    isActive = !isActive;
+
+    if (isActive) {
+      setUpAntdToken();
+      vscode.window.showInformationMessage("antd design token is active now.");
+    } else {
+      disposeHover.dispose();
+      disposeTyping.dispose();
+      vscode.window.showInformationMessage(
+        "antd design token is inactive now."
+      );
+    }
+  });
+}
+
+function setUpAntdToken() {
   const fullToken = getDesignToken();
 
+  if (!fullToken) {
+    throw new Error("Get fullToken failed.");
+  }
+
   // HOVER
-  vscode.languages.registerHoverProvider(
+  disposeHover = vscode.languages.registerHoverProvider(
     [
       "javascript",
       "javascriptreact",
@@ -68,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
     items.push(item);
   }
 
-  vscode.languages.registerCompletionItemProvider(
+  disposeTyping = vscode.languages.registerCompletionItemProvider(
     [
       "javascript",
       "javascriptreact",

@@ -16,6 +16,14 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "antd-design-token.toggle",
+        "title": "antd design token: toggle active"
+      }
+    ]
+  },
   "main": "./dist/extension.js",
   "icon": "assets/logo.png",
   "scripts": {
