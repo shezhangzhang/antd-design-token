@@ -1,6 +1,6 @@
 {
   "name": "antd-design-token",
-  "displayName": "antd design token",
+  "displayName": "antd Design Token",
   "description": "VS Code extension for antd v5 design token.",
   "version": "0.1.0",
   "publisher": "shezhangzhang",
@@ -20,7 +20,7 @@
     "commands": [
       {
         "command": "antd-design-token.toggle",
-        "title": "antd design token: toggle active"
+        "title": "antd Design Token: Toggle Active"
       }
     ]
   },
