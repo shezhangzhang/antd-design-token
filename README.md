@@ -1,14 +1,17 @@
-# antd-design-token README
+# antd design token
 
-VS Code extension for antd v5 design token.
+VSCode extension for antd v5 design token.
 
 ## Features
 
-中文
+Provide the hover hint of antd v5 design token, include `color`, `value`.
 
-1. 提供 antd design token 的 hover 值提示，例如：`颜色`，`数值`。
-2. 输入时提示 token 值，注意，为了使值提示出现在提示区域前面，在输入 token 前可以先输入一个 `a`。例如输入 `padding...`，可以输入 `apadding...`，这并不会影响确定后插入的变量。
+![hover](assets/hover.gif)
 
-## Command
+Support completion for antd v5 design token value on typing. Note that for sorting, you can type an `a` before typing the token. For example, if you want to type `padding...`, you can type `apadding...`. Which will not affect the variable inserted after the enter keydown.
 
-你可以使用 `antd-design-token:toggle` 命令来激活或者关闭此插件。
+![typing](assets/type.gif)
+
+## Commands
+
+You can use command: `antd-design-token:toggle` to active or inactive this extension.
