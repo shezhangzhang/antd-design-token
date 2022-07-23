@@ -1,41 +1,34 @@
 import * as vscode from "vscode";
-import getDesignToken from "antd-token-previewer/es/utils/getDesignToken";
 import { genMarkdownString } from "./utils";
 import { LANGUAGE_SELECTORS } from "./config";
 
 /**
  * register provider for hover and typing antd design token
  */
-export default function setupAntdToken(): vscode.Disposable[] {
-  const fullToken = getDesignToken();
-
-  if (!fullToken) {
-    throw new Error("Get fullToken failed.");
-  }
-
+export default function setupAntdToken(fullToken: any): vscode.Disposable {
   let disposeHover: vscode.Disposable;
   let disposeTyping: vscode.Disposable;
 
   // HOVER
-  disposeHover = vscode.languages.registerHoverProvider(LANGUAGE_SELECTORS, {
-    provideHover(document, position) {
-      const range = document.getWordRangeAtPosition(position);
-      const word = document.getText(range);
+  // disposeHover = vscode.languages.registerHoverProvider(LANGUAGE_SELECTORS, {
+  //   provideHover(document, position) {
+  //     const range = document.getWordRangeAtPosition(position);
+  //     const word = document.getText(range);
 
-      if (fullToken.hasOwnProperty(word as string)) {
-        const value = String(fullToken[word as keyof typeof fullToken]);
-        const colorSpan = genMarkdownString(value);
+  //     if (fullToken.hasOwnProperty(word as string)) {
+  //       const value = String(fullToken[word as keyof typeof fullToken]);
+  //       const colorSpan = genMarkdownString(value);
 
-        const markDownString = new vscode.MarkdownString(
-          `<h3>antd design token: ${word}</h3>${colorSpan}<code>${value}</code><br></br>`
-        );
-        markDownString.supportHtml = true;
-        markDownString.isTrusted = true;
+  //       const markDownString = new vscode.MarkdownString(
+  //         `<h3>antd design token: ${word}</h3>${colorSpan}<code>${value}</code><br></br>`
+  //       );
+  //       markDownString.supportHtml = true;
+  //       markDownString.isTrusted = true;
 
-        return new vscode.Hover(markDownString);
-      }
-    },
-  });
+  //       return new vscode.Hover(markDownString);
+  //     }
+  //   },
+  // });
 
   // TYPING
   // Add antd token value tips on typing
@@ -73,5 +66,5 @@ export default function setupAntdToken(): vscode.Disposable[] {
     }
   );
 
-  return [disposeHover, disposeTyping];
+  return disposeTyping;
 }

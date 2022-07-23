@@ -10,13 +10,22 @@ import rgbHex from "rgb-hex";
  * @returns MarkdownString | string
  */
 export function genMarkdownString(value: string): string {
-  let hexColor = "";
-  if (/#[0-9a-fA-F]+/.test(value)) {
-    hexColor = value;
-  } else if (value.startsWith("rgb")) {
-    hexColor = `#${rgbHex(value)}`;
-  }
+  const hexColor = getColorTokenValue(value);
+
   return hexColor
     ? `<span style='background-color:${hexColor};'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;&nbsp;`
     : "";
+}
+
+export function getColorTokenValue(value: string): string {
+  const stringValue = String(value);
+
+  let result: string = "";
+  if (/#[0-9a-fA-F]+/.test(stringValue)) {
+    result = stringValue;
+  } else if (stringValue.startsWith("rgb")) {
+    result = `#${rgbHex(stringValue)}`;
+  }
+
+  return result;
 }
