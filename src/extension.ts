@@ -1,11 +1,10 @@
 import getDesignToken from "antd-token-previewer/es/utils/getDesignToken";
 import * as vscode from "vscode";
 import setupChangeEvent from "./decorator";
-import setupAntdToken from "./hover";
+import setupAntdToken from "./typing";
 
 export function activate(context: vscode.ExtensionContext) {
   let isActive = true;
-  // let disposeHover: vscode.Disposable;
   let disposeTyping: vscode.Disposable;
 
   const fullToken = getDesignToken();
@@ -29,7 +28,6 @@ export function activate(context: vscode.ExtensionContext) {
           "antd design token is active now."
         );
       } else {
-        // disposeHover.dispose();
         disposeTyping.dispose();
         vscode.window.showInformationMessage(
           "antd design token is inactive now."

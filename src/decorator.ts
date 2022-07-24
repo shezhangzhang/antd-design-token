@@ -77,6 +77,7 @@ export default function setupChangeEvent(
           );
           markDownString.supportHtml = true;
           markDownString.isTrusted = true;
+
           const decoration = {
             range: new vscode.Range(startPos, endPos),
             hoverMessage: markDownString,
@@ -96,7 +97,6 @@ export default function setupChangeEvent(
           });
 
           decorationSet.add(decorationType);
-
           activeEditor.setDecorations(decorationType, valueDecorations);
         }
       });
