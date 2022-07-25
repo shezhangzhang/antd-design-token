@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { genMarkdownString, getColorTokenValue } from "./utils";
 
-interface DecorationItem {
+interface LineDecorationItem {
   line: number;
   disposable: vscode.TextEditorDecorationType;
 }
@@ -12,18 +12,15 @@ export default function setupChangeEvent(
 ) {
   let timeout: NodeJS.Timer | undefined = undefined;
   let activeEditor = vscode.window.activeTextEditor;
-  const fullTokenKeys = Object.keys(fullToken);
-  const fileDecorationMap = new Map<string, DecorationItem[]>();
-  const openedFileNameSet = new Set<string>();
-  let lineCount = 0;
+  const fileDecorationMap = new Map<
+    string,
+    Map<number, vscode.TextEditorDecorationType[]>
+  >();
+  let fileLineCount = 0;
 
   if (activeEditor) {
-    lineCount = activeEditor.document.lineCount;
-    const isOpened = checkOpenedFile(activeEditor.document.fileName);
-
-    if (!isOpened) {
-      triggerUpdateDecorations();
-    }
+    fileLineCount = activeEditor.document.lineCount;
+    triggerUpdateDecorations();
   }
 
   vscode.workspace.onDidChangeTextDocument(
@@ -33,7 +30,7 @@ export default function setupChangeEvent(
       }
 
       const startLine = event.contentChanges[0].range.start.line;
-      let endLine = event.contentChanges[0].range.end.line;
+      const endLine = event.contentChanges[0].range.end.line;
 
       if (activeEditor && event.document === activeEditor.document) {
         /**
@@ -43,7 +40,7 @@ export default function setupChangeEvent(
         const throttle =
           event.reason !== undefined
             ? false
-            : event.document.lineCount - lineCount >= 0;
+            : event.document.lineCount - fileLineCount >= 0;
         triggerUpdateDecorations(throttle, true, startLine, endLine);
       }
     },
@@ -53,14 +50,18 @@ export default function setupChangeEvent(
 
   vscode.window.onDidChangeActiveTextEditor(
     (editor) => {
+      console.log("Active Editor!", editor?.document.fileName);
       activeEditor = editor;
       if (editor) {
-        lineCount = editor.document.lineCount;
-        const isOpened = checkOpenedFile(editor.document.fileName);
+        const fileName = editor.document.fileName;
+        fileLineCount = editor.document.lineCount;
 
-        if (!isOpened) {
-          triggerUpdateDecorations();
+        if (fileDecorationMap.has(fileName)) {
+          clearDecoration(fileName);
+          fileDecorationMap.set(fileName, new Map());
         }
+
+        triggerUpdateDecorations();
       }
     },
     null,
@@ -79,132 +80,137 @@ export default function setupChangeEvent(
     }
     if (throttle) {
       timeout = setTimeout(() => {
-        updateDecorations(isEdit, startLine, endLine);
+        updateDecorations(startLine, endLine);
       }, 500);
     } else {
-      updateDecorations(isEdit, startLine, endLine);
+      updateDecorations(startLine, endLine);
     }
   }
 
-  function updateDecorations(
-    isEdit: boolean,
-    startLine?: number,
-    endLine?: number
-  ) {
+  function updateDecorations(startLine?: number, endLine?: number) {
     if (activeEditor) {
-      console.log("!!!!!!update!!!!", startLine, endLine);
-      const text = activeEditor.document.getText();
-      const fileName = activeEditor.document.fileName;
+      if (startLine && endLine) {
+        console.log("editing", startLine, endLine);
+        const currentLineCount = activeEditor.document.lineCount;
+        const diffLine = currentLineCount - fileLineCount;
+        const fileName = activeEditor.document.fileName;
+        console.log("diffLine", diffLine);
 
-      if (!fileDecorationMap.has(fileName)) {
-        fileDecorationMap.set(fileName, []);
-      }
+        if (diffLine < 0) {
+          const lines = getLines(startLine, endLine);
+          return clearDecoration(fileName, lines);
+        }
 
-      const currentFileDecorations = fileDecorationMap.get(fileName) || [];
-      const currentLineCount = activeEditor.document.lineCount;
-      const diffLine = currentLineCount - lineCount;
-      console.log("diffLine", diffLine);
-      lineCount = currentLineCount;
-
-      /**
-       * Dispose the line decoration between start and end
-       */
-      if (
-        startLine &&
-        endLine &&
-        currentFileDecorations.length &&
-        diffLine <= 0
-      ) {
-        for (let i = startLine; i <= endLine; i++) {
-          for (let j = 0; j < currentFileDecorations.length; j++) {
-            if (currentFileDecorations[j].line === i) {
-              currentFileDecorations[j].disposable.dispose();
-              console.log("dispose", i);
-              currentFileDecorations.splice(j--, 1);
-            }
-          }
+        if (diffLine === 0) {
+          clearDecoration(fileName, [startLine]);
         }
       }
 
-      // if (diffLine > 0) {
-      //   return;
-      // }
-
-      fullTokenKeys.forEach((key: string) => {
-        if (!activeEditor) {
-          return;
-        }
-
-        const regEx = new RegExp(`\\b(${key})\\b(?!-)`, "g");
-
-        let match;
-        while ((match = regEx.exec(text))) {
-          const valueDecorations: vscode.DecorationOptions[] = [];
-          let decorationType: vscode.TextEditorDecorationType;
-
-          /**
-           * TIPS:
-           * Actually, they are always at the same line.
-           */
-          const startPos = activeEditor.document.positionAt(match.index);
-          const endPos = activeEditor.document.positionAt(
-            match.index + match[0].length
-          );
-          const currentLine = startPos.line;
-
-          if (
-            !isEdit ||
-            // diffLine > 0 ||
-            (startLine &&
-              endLine &&
-              currentLine >= startLine &&
-              currentLine <= endLine)
-          ) {
-            const value = String(fullToken[key]);
-            const colorSpan = genMarkdownString(value);
-            const markDownString = new vscode.MarkdownString(
-              `<h3>antd design token: ${match[0]}</h3>${colorSpan}<code>${value}</code><br></br>`
-            );
-            markDownString.supportHtml = true;
-            markDownString.isTrusted = true;
-
-            const decoration = {
-              range: new vscode.Range(startPos, endPos),
-              hoverMessage: markDownString,
-            };
-
-            const colorValue = getColorTokenValue(fullToken[key]);
-            valueDecorations.push(decoration);
-
-            decorationType = vscode.window.createTextEditorDecorationType({
-              after: {
-                contentText: colorValue ? `**` : `(${String(fullToken[key])})`,
-                backgroundColor: colorValue || "",
-                margin: "0 0 0 4px;",
-                color: colorValue || "#1890ff",
-                fontWeight: "bolder",
-              },
-            });
-
-            currentFileDecorations.push({
-              line: currentLine,
-              disposable: decorationType,
-            });
-            console.log("setDecorations", currentLine);
-            activeEditor.setDecorations(decorationType, valueDecorations);
-          }
-        }
-      });
-      fileDecorationMap.set(fileName, currentFileDecorations);
+      setupDecoration(startLine, endLine);
     }
   }
 
-  function checkOpenedFile(fileName: string): boolean {
-    if (openedFileNameSet.has(fileName)) {
-      return true;
-    } else {
-      openedFileNameSet.add(fileName);
-      return false;
+  function setupDecoration(startLine?: number, endLine?: number) {
+    console.log("!!!!!!updating!!!!!", startLine, endLine);
+    const fileName = activeEditor!.document.fileName;
+    const text = activeEditor!.document.getText();
+    const fullTokenKeys = Object.keys(fullToken);
+    const lineDecorationMap = new Map<
+      number,
+      vscode.TextEditorDecorationType[]
+    >();
+
+    if (!fileDecorationMap.has(fileName)) {
+      fileDecorationMap.set(fileName, new Map());
     }
+
+    fullTokenKeys.forEach((key: string) => {
+      const regEx = new RegExp(`\\b(${key})\\b(?!-)`, "g");
+      let match;
+
+      while ((match = regEx.exec(text))) {
+        const valueDecorations: vscode.DecorationOptions[] = [];
+        let decorationType: vscode.TextEditorDecorationType;
+
+        /**
+         * TIPS:
+         * Actually, they are always at the same line.
+         */
+        const startPos = activeEditor!.document.positionAt(match.index);
+        const endPos = activeEditor!.document.positionAt(
+          match.index + match[0].length
+        );
+        const currentLine = startPos.line;
+        const value = String(fullToken[key]);
+        const colorSpan = genMarkdownString(value);
+        const markDownString = new vscode.MarkdownString(
+          `<h3>antd design token: ${match[0]}</h3>${colorSpan}<code>${value}</code><br></br>`
+        );
+        markDownString.supportHtml = true;
+        markDownString.isTrusted = true;
+
+        const decoration = {
+          range: new vscode.Range(startPos, endPos),
+          hoverMessage: markDownString,
+        };
+
+        const colorValue = getColorTokenValue(fullToken[key]);
+        valueDecorations.push(decoration);
+
+        decorationType = vscode.window.createTextEditorDecorationType({
+          after: {
+            contentText: colorValue ? `**` : `${String(fullToken[key])}`,
+            backgroundColor: colorValue || "",
+            margin: "0 0 0 5px;",
+            color: colorValue || "#b37feb",
+            fontWeight: "bolder",
+          },
+        });
+
+        const lineValue = lineDecorationMap.get(currentLine);
+        lineDecorationMap.set(
+          currentLine,
+          lineValue ? lineValue.concat([decorationType]) : [decorationType]
+        );
+        console.log("setDecorations", currentLine);
+        activeEditor!.setDecorations(decorationType, valueDecorations);
+      }
+    });
+
+    fileDecorationMap.set(fileName, lineDecorationMap);
+    console.log(fileDecorationMap);
+  }
+
+  function clearDecoration(fileName: string, lines?: number[]) {
+    const lineDecorationMap = fileDecorationMap.get(fileName);
+    if (lineDecorationMap) {
+      if (lines) {
+        lines.forEach((line) => {
+          console.log("dispose line", line);
+          lineDecorationMap.get(line)?.forEach(dispose);
+        });
+      } else {
+        lineDecorationMap.forEach((value) => {
+          value.forEach(dispose);
+        });
+      }
+    }
+  }
+
+  function dispose(disposable: vscode.TextEditorDecorationType) {
+    disposable.dispose();
+  }
+
+  function getLines(start: number, end: number): number[] {
+    const result: number[] = [];
+
+    if (start > end) {
+      return [];
+    }
+
+    for (let i = start; i <= end; i++) {
+      result.push(i);
+    }
+    return result;
   }
 }
