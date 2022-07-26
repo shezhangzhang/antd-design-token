@@ -1,7 +1,7 @@
 import getDesignToken from "antd-token-previewer/es/utils/getDesignToken";
 import * as vscode from "vscode";
-import setupChangeEvent from "./decorator";
-import setupAntdToken from "./typing";
+import setupEventListener from "./listener";
+import setupAntdTokenCompletion from "./typing";
 
 export function activate(context: vscode.ExtensionContext) {
   let isActive = true;
@@ -14,8 +14,9 @@ export function activate(context: vscode.ExtensionContext) {
     return;
   }
 
-  disposeTyping = setupAntdToken(fullToken);
-  setupChangeEvent(context, fullToken);
+  disposeTyping = setupAntdTokenCompletion(fullToken);
+
+  setupEventListener(context, fullToken);
 
   const disposable = vscode.commands.registerCommand(
     "antd-design-token.toggle",
@@ -23,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
       isActive = !isActive;
 
       if (isActive) {
-        disposeTyping = setupAntdToken(fullToken);
+        disposeTyping = setupAntdTokenCompletion(fullToken);
         vscode.window.showInformationMessage(
           "antd design token is active now."
         );
