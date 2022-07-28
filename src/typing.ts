@@ -5,7 +5,9 @@ import { LANGUAGE_SELECTORS } from "./config";
 /**
  * register provider for hover and typing antd design token
  */
-export default function setupAntdToken(fullToken: any): vscode.Disposable {
+export default function setupAntdTokenCompletion(
+  fullToken: any
+): vscode.Disposable {
   let disposeTyping: vscode.Disposable;
 
   // TYPING
