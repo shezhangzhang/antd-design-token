@@ -24,6 +24,10 @@
       }
     ]
   },
+  "galleryBanner": {
+    "color": "#1890ff",
+    "theme": "dark"
+  },
   "main": "./dist/extension.js",
   "icon": "assets/logo.png",
   "scripts": {
