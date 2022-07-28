@@ -26,18 +26,18 @@ export default function setupEventListener(
         diffLine = activeEditor.document.lineCount - fileLineCount;
         fileLineCount = activeEditor.document.lineCount;
 
-        const [startLine, endLine] = getStartEndLine(
-          event.document,
-          event.contentChanges[0]
-        );
+        const [startLine, endLine, originalStartLine, originalEndLine] =
+          getStartEndLine(event.document, event.contentChanges[0]);
 
         decorationManager.setActiveEditor(activeEditor);
         decorationManager.triggerUpdateDecorations(
-          diffLine === 0,
+          event.reason ? false : diffLine === 0,
           true,
           diffLine,
           startLine,
-          endLine
+          endLine,
+          originalStartLine,
+          originalEndLine
         );
       }
     },
@@ -65,6 +65,8 @@ export default function setupEventListener(
     const newLines = change.text.split("\n").length;
     let startLine = change.range.start.line;
     let endLine = change.range.end.line;
+    const originalStartLine = startLine;
+    const originalEndLine = endLine;
     const startLinePos = document.lineAt(startLine);
 
     const isStartLineEmpty = startLinePos.isEmptyOrWhitespace;
@@ -95,7 +97,7 @@ export default function setupEventListener(
     /**
      * enter
      */
-    if (!isStartLineEmpty && diffLine === 1) {
+    if (!isStartLineEmpty && diffLine === 1 && startLine === endLine) {
       startLine += 1;
       endLine += 1;
     }
@@ -105,6 +107,13 @@ export default function setupEventListener(
      */
     if (!isStartLineEmpty && isStartLineLastPos && diffLine < 0) {
       startLine += 1;
+    }
+
+    /**
+     * paste override copyed lines
+     */
+    if (!isStartLineLastPos) {
+      return [startLine, endLine, originalStartLine, originalEndLine];
     }
 
     return [startLine, endLine];

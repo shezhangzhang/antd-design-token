@@ -27,7 +27,9 @@ export default class DecorationManager {
     isEdit: boolean = false,
     diffLine: number = 0,
     startLine?: number,
-    endLine?: number
+    endLine?: number,
+    originalStartLine?: number,
+    originalEndLine?: number
   ) {
     /**
      * Active editor changed event
@@ -46,14 +48,32 @@ export default class DecorationManager {
 
     if (throttle) {
       this.timeout = setTimeout(() => {
-        this.setupDecorations(diffLine, startLine, endLine);
+        this.setupDecorations(
+          diffLine,
+          startLine,
+          endLine,
+          originalStartLine,
+          originalEndLine
+        );
       }, 500);
     } else {
-      this.setupDecorations(diffLine, startLine, endLine);
+      this.setupDecorations(
+        diffLine,
+        startLine,
+        endLine,
+        originalStartLine,
+        originalEndLine
+      );
     }
   }
 
-  setupDecorations(diffLine: number, startLine?: number, endLine?: number) {
+  setupDecorations(
+    diffLine: number,
+    startLine?: number,
+    endLine?: number,
+    originalStartLine?: number,
+    originalEndLine?: number
+  ) {
     if (startLine && endLine) {
       const lines = this.getLines(startLine, endLine);
 
@@ -68,6 +88,17 @@ export default class DecorationManager {
       }
 
       if (diffLine > 0) {
+        /**
+         * paste override copyed lines
+         */
+        if (originalStartLine && originalEndLine) {
+          const originalLines = this.getLines(
+            originalStartLine,
+            originalEndLine
+          );
+          this.clearCurrentFileDecoration(originalLines);
+        }
+
         this.updateFileDecorationMap(diffLine, startLine);
         this.setDecorations(lines);
       }
