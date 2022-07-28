@@ -29,7 +29,6 @@ export default class DecorationManager {
     startLine?: number,
     endLine?: number
   ) {
-    console.log("fileName", this.fileName);
     /**
      * Active editor changed event
      */
@@ -56,9 +55,8 @@ export default class DecorationManager {
 
   setupDecorations(diffLine: number, startLine?: number, endLine?: number) {
     if (startLine && endLine) {
-      console.log("diffLine", diffLine);
-
       const lines = this.getLines(startLine, endLine);
+
       if (diffLine < 0) {
         this.clearCurrentFileDecoration(lines);
         this.updateFileDecorationMap(diffLine, startLine);
@@ -79,7 +77,6 @@ export default class DecorationManager {
   }
 
   setDecorations(sepecificLines?: number[]) {
-    console.log("!!!!!!updating!!!!!");
     const text = this.activeEditor!.document.getText();
     const fullTokenKeys = Object.keys(this.fullToken);
     const lineDecorationMap: Map<number, vscode.TextEditorDecorationType[]> =
@@ -108,16 +105,13 @@ export default class DecorationManager {
     });
 
     this.fileDecorationMap.set(this.fileName, lineDecorationMap);
-    console.log(this.fileDecorationMap);
   }
 
   clearCurrentFileDecoration(lines?: number[]) {
     const lineDecorationMapItem = this.fileDecorationMap.get(this.fileName);
-    console.log("lineDecorationMapItem", lineDecorationMapItem);
     if (lineDecorationMapItem?.size) {
       if (lines) {
         lines.forEach((line) => {
-          console.log("dispose line", line);
           if (lineDecorationMapItem.has(line)) {
             lineDecorationMapItem.get(line)?.forEach(this.dispose);
             lineDecorationMapItem.delete(line);
@@ -191,15 +185,12 @@ export default class DecorationManager {
       currentLine,
       lineValue ? lineValue.concat([decorationType]) : [decorationType]
     );
-    // console.log("setDecorations", currentLine);
     this.activeEditor!.setDecorations(decorationType, valueDecorations);
   }
 
   updateFileDecorationMap(diffLine: number, startLine: number) {
     const lineDecorationMapItem = this.fileDecorationMap.get(this.fileName);
     const newMap: Map<number, vscode.TextEditorDecorationType[]> = new Map();
-    console.log("before: ", lineDecorationMapItem);
-    console.log("startLine", startLine);
 
     if (lineDecorationMapItem?.size) {
       lineDecorationMapItem.forEach((value, key) => {
@@ -214,7 +205,6 @@ export default class DecorationManager {
       });
     }
 
-    console.log("after: ", newMap);
     this.fileDecorationMap.set(this.fileName, newMap);
   }
 }

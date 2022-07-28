@@ -23,8 +23,6 @@ export default function setupEventListener(
       }
 
       if (activeEditor && event.document === activeEditor.document) {
-        console.log("change", event.contentChanges[0]);
-
         diffLine = activeEditor.document.lineCount - fileLineCount;
         fileLineCount = activeEditor.document.lineCount;
 
@@ -33,7 +31,6 @@ export default function setupEventListener(
           event.contentChanges[0]
         );
 
-        console.log("editing", startLine, endLine);
         decorationManager.setActiveEditor(activeEditor);
         decorationManager.triggerUpdateDecorations(
           diffLine === 0,
@@ -76,10 +73,6 @@ export default function setupEventListener(
       Math.max(startLinePos.text.length, 0)
     );
     const isStartLineLastPos = startLineLastPos.isEqual(change.range.start);
-
-    console.log("original", startLine, endLine);
-    console.log("isStartLineEmpty", isStartLineEmpty);
-    console.log("isStartLineLastPos", isStartLineLastPos);
 
     /**
      * paste multiple lines
