@@ -23,22 +23,29 @@ export default function setupEventListener(
       }
 
       if (activeEditor && event.document === activeEditor.document) {
-        diffLine = activeEditor.document.lineCount - fileLineCount;
-        fileLineCount = activeEditor.document.lineCount;
+        /**
+         * redo and undo
+         */
+        if (event.reason) {
+          decorationManager.triggerUpdateDecorations(true);
+        } else {
+          diffLine = activeEditor.document.lineCount - fileLineCount;
+          fileLineCount = activeEditor.document.lineCount;
 
-        const [startLine, endLine, originalStartLine, originalEndLine] =
-          getStartEndLine(event.document, event.contentChanges[0]);
+          const [startLine, endLine] = getStartEndLine(
+            event.document,
+            event.contentChanges[0]
+          );
 
-        decorationManager.setActiveEditor(activeEditor);
-        decorationManager.triggerUpdateDecorations(
-          event.reason ? false : diffLine === 0,
-          true,
-          diffLine,
-          startLine,
-          endLine,
-          originalStartLine,
-          originalEndLine
-        );
+          decorationManager.setActiveEditor(activeEditor);
+          decorationManager.triggerUpdateDecorations(
+            diffLine === 0,
+            true,
+            diffLine,
+            startLine,
+            endLine
+          );
+        }
       }
     },
     null,
