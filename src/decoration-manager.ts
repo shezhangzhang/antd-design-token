@@ -115,6 +115,10 @@ export default class DecorationManager {
 
     if (!this.fileDecorationMap.has(this.fileName)) {
       this.fileDecorationMap.set(this.fileName, new Map());
+    } else {
+      if (!sepecificLines) {
+        this.fileDecorationMap.set(this.fileName, new Map());
+      }
     }
 
     fullTokenKeys.forEach((key: string) => {

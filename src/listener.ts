@@ -29,22 +29,23 @@ export default function setupEventListener(
 
       if (activeEditor && event.document === activeEditor.document) {
         /**
-         * redo and undo
+         * redo, undo and line change
          */
-        if (event.reason) {
+        diffLine = activeEditor.document.lineCount - fileLineCount;
+        fileLineCount = activeEditor.document.lineCount;
+        if (event.reason || diffLine !== 0) {
           decorationManager.triggerUpdateDecorations(true);
         } else {
-          diffLine = activeEditor.document.lineCount - fileLineCount;
-          fileLineCount = activeEditor.document.lineCount;
-
-          const [startLine, endLine] = getStartEndLine(
-            event.document,
-            event.contentChanges[0]
-          );
+          // const [startLine, endLine] = getStartEndLine(
+          //   event.document,
+          //   event.contentChanges[0]
+          // );
+          const startLine = event.contentChanges[0].range.start.line;
+          const endLine = event.contentChanges[0].range.end.line;
 
           decorationManager.setActiveEditor(activeEditor);
           decorationManager.triggerUpdateDecorations(
-            diffLine === 0,
+            true,
             true,
             diffLine,
             startLine,
@@ -82,11 +83,15 @@ export default function setupEventListener(
     const startLinePos = document.lineAt(startLine);
 
     const isStartLineEmpty = startLinePos.isEmptyOrWhitespace;
+    const isSecondLineEmpty = document.lineAt(
+      startLine + 1
+    ).isEmptyOrWhitespace;
     const startLineLastPos = new vscode.Position(
       startLine,
       Math.max(startLinePos.text.length, 0)
     );
-    const isStartLineLastPos = startLineLastPos.isEqual(change.range.start);
+    const startRange = change.range.start;
+    const isStartLineLastPos = startLineLastPos.isEqual(startRange);
 
     /**
      * paste multiple lines
@@ -109,7 +114,7 @@ export default function setupEventListener(
     /**
      * enter
      */
-    if (!isStartLineEmpty && diffLine === 1 && startLine === endLine) {
+    if (!isStartLineEmpty && isSecondLineEmpty && diffLine === 1) {
       startLine += 1;
       endLine += 1;
     }
