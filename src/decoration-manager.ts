@@ -36,7 +36,7 @@ export default class DecorationManager {
      */
     if (!isEdit) {
       if (this.fileDecorationMap.has(this.fileName)) {
-        this.clearCurrentFileDecoration();
+        this.clearFileDecoration(this.fileName);
         this.fileDecorationMap.set(this.fileName, new Map());
       }
     }
@@ -78,12 +78,12 @@ export default class DecorationManager {
       const lines = this.getLines(startLine, endLine);
 
       if (diffLine < 0) {
-        this.clearCurrentFileDecoration(lines);
+        this.clearFileDecoration(this.fileName, lines);
         this.updateFileDecorationMap(diffLine, startLine);
       }
 
       if (diffLine === 0) {
-        this.clearCurrentFileDecoration([startLine]);
+        this.clearFileDecoration(this.fileName, [startLine]);
         this.setDecorations([startLine]);
       }
 
@@ -96,7 +96,7 @@ export default class DecorationManager {
             originalStartLine,
             originalEndLine
           );
-          this.clearCurrentFileDecoration(originalLines);
+          this.clearFileDecoration(this.fileName, originalLines);
         }
 
         this.updateFileDecorationMap(diffLine, startLine);
@@ -138,8 +138,9 @@ export default class DecorationManager {
     this.fileDecorationMap.set(this.fileName, lineDecorationMap);
   }
 
-  clearCurrentFileDecoration(lines?: number[]) {
-    const lineDecorationMapItem = this.fileDecorationMap.get(this.fileName);
+  clearFileDecoration(fileName: string, lines?: number[]) {
+    const lineDecorationMapItem = this.fileDecorationMap.get(fileName);
+
     if (lineDecorationMapItem?.size) {
       if (lines) {
         lines.forEach((line) => {
@@ -237,5 +238,17 @@ export default class DecorationManager {
     }
 
     this.fileDecorationMap.set(this.fileName, newMap);
+  }
+
+  clearAllFileDecorations() {
+    console.log(11111);
+    console.log(this);
+    console.log(this.fileDecorationMap);
+    if (this.fileDecorationMap?.size) {
+      this.fileDecorationMap.forEach((value, key) => {
+        console.log("key", key);
+        this.clearFileDecoration(key);
+      });
+    }
   }
 }

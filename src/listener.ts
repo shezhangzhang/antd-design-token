@@ -1,10 +1,15 @@
 import * as vscode from "vscode";
 import DecorationManager from "./decoration-manager";
 
+export interface DisposableAndClear {
+  disposable: vscode.Disposable[];
+  clear: () => void;
+}
+
 export default function setupEventListener(
   context: vscode.ExtensionContext,
   fullToken: any
-) {
+): DisposableAndClear {
   let diffLine: number = 0;
   let fileLineCount: number = 0;
   let activeEditor = vscode.window.activeTextEditor;
@@ -16,7 +21,7 @@ export default function setupEventListener(
     decorationManager.triggerUpdateDecorations();
   }
 
-  vscode.workspace.onDidChangeTextDocument(
+  const disposableTextChange = vscode.workspace.onDidChangeTextDocument(
     (event) => {
       if (event.contentChanges.length === 0) {
         return;
@@ -52,7 +57,7 @@ export default function setupEventListener(
     context.subscriptions
   );
 
-  vscode.window.onDidChangeActiveTextEditor(
+  const disposableActiveChange = vscode.window.onDidChangeActiveTextEditor(
     (editor) => {
       activeEditor = editor;
       if (editor) {
@@ -125,4 +130,9 @@ export default function setupEventListener(
 
     return [startLine, endLine];
   }
+
+  return {
+    disposable: [disposableTextChange, disposableActiveChange],
+    clear: () => decorationManager.clearAllFileDecorations(),
+  };
 }
