@@ -31,7 +31,7 @@
   "main": "./dist/extension.js",
   "icon": "assets/logo.png",
   "scripts": {
-    "publish": "vsce package",
+    "publish": "vsce publish",
     "vscode:prepublish": "yarn run package",
     "compile": "webpack",
     "watch": "webpack --watch",
