@@ -7,8 +7,7 @@ import setupAntdTokenCompletion from "./typing";
 import { checkAntdProject } from "./utils";
 
 export function activate(context: vscode.ExtensionContext) {
-  const ACTIVE_KEY = "antd-design-token-active-key";
-  const isActive = context.globalState.get(ACTIVE_KEY);
+  let isActive = true;
   let disposeTyping: vscode.Disposable | undefined;
   let disposableAndClear: DisposableAndClear | undefined;
   let disposeEditor: vscode.Disposable | undefined;
@@ -20,19 +19,17 @@ export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand(
     "antd-design-token.toggle",
     () => {
-      const isActive = context.globalState.get(ACTIVE_KEY);
-      context.globalState.update(ACTIVE_KEY, !isActive);
+      isActive = !isActive;
+      disposeAll();
 
       if (isActive) {
-        disposeAll();
-        vscode.window.showInformationMessage(
-          "antd design token is inactive now."
-        );
-      } else {
-        disposeEditor?.dispose();
         setup();
         vscode.window.showInformationMessage(
           "antd design token is active now."
+        );
+      } else {
+        vscode.window.showInformationMessage(
+          "antd design token is inactive now."
         );
       }
     }
@@ -76,6 +73,10 @@ export function activate(context: vscode.ExtensionContext) {
       );
       disposableAndClear.clear();
       disposableAndClear = undefined;
+    }
+
+    if (disposeEditor) {
+      disposeEditor.dispose();
     }
   }
 
