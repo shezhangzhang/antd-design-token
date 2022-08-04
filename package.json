@@ -2,7 +2,7 @@
   "name": "antd-design-token",
   "displayName": "antd Design Token",
   "description": "VSCode extension for antd v5 design token.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "shezhangzhang",
   "engines": {
     "vscode": "^1.68.0"

@@ -34,7 +34,6 @@ export function getColorTokenValue(value: string): string {
 
 export function checkAntdProject(): boolean {
   const projectPath = getProjectPath();
-  console.log("projectPath", projectPath);
 
   if (projectPath) {
     const pkgFilePath = path.join(projectPath, "/package.json");
@@ -55,7 +54,6 @@ export function checkAntdProject(): boolean {
 
 export function getProjectPath(): string | undefined {
   const fileName = vscode.window.activeTextEditor?.document?.fileName;
-  console.log("filename", fileName);
 
   return vscode.workspace.workspaceFolders
     ?.map((folder) => folder.uri.fsPath)

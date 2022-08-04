@@ -11,6 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
   const isActive = context.globalState.get(ACTIVE_KEY);
   let disposeTyping: vscode.Disposable | undefined;
   let disposableAndClear: DisposableAndClear | undefined;
+  let disposeEditor: vscode.Disposable | undefined;
 
   if (isActive || isActive === undefined) {
     setup();
@@ -28,6 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
           "antd design token is inactive now."
         );
       } else {
+        disposeEditor?.dispose();
         setup();
         vscode.window.showInformationMessage(
           "antd design token is active now."
@@ -64,21 +66,21 @@ export function activate(context: vscode.ExtensionContext) {
 
   function disposeAll() {
     if (disposeTyping) {
-      disposeTyping?.dispose();
+      disposeTyping.dispose();
       disposeTyping = undefined;
     }
 
     if (disposableAndClear) {
-      disposableAndClear?.disposable?.forEach((disposable) =>
+      disposableAndClear.disposable.forEach((disposable) =>
         disposable?.dispose()
       );
-      disposableAndClear?.clear();
+      disposableAndClear.clear();
       disposableAndClear = undefined;
     }
   }
 
   function activeEditorListener(fullToken: any) {
-    vscode.window.onDidChangeActiveTextEditor(
+    disposeEditor = vscode.window.onDidChangeActiveTextEditor(
       (editor) => {
         if (editor) {
           const isAntdProject = checkAntdProject();

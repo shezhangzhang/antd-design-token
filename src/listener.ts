@@ -19,7 +19,6 @@ export default function setupEventListenerAndDecorations(
   if (activeEditor) {
     fileLineCount = activeEditor.document.lineCount;
     decorationManager.setActiveEditor(activeEditor);
-    console.log(44444);
     decorationManager.triggerUpdateDecorations();
   }
 
@@ -62,7 +61,6 @@ export default function setupEventListenerAndDecorations(
 
   const disposableActiveChange = vscode.window.onDidChangeActiveTextEditor(
     (editor) => {
-      console.log("change!!!!!");
       activeEditor = editor;
       if (editor) {
         fileLineCount = editor.document.lineCount || 0;
