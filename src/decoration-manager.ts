@@ -122,7 +122,7 @@ export default class DecorationManager {
     }
 
     fullTokenKeys.forEach((key: string) => {
-      const regEx = new RegExp(`\\b(${key})\\b(?!-)`, "g");
+      const regEx = new RegExp(`\\b(${key})\\b(?!-|:)`, "g");
       let match;
 
       while ((match = regEx.exec(text))) {
