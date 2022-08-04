@@ -1,33 +1,36 @@
 import getDesignToken from "antd-token-previewer/es/utils/getDesignToken";
 import * as vscode from "vscode";
-import setupEventListener, { DisposableAndClear } from "./listener";
+import setupEventListenerAndDecorations, {
+  DisposableAndClear,
+} from "./listener";
 import setupAntdTokenCompletion from "./typing";
+import { checkAntdProject } from "./utils";
 
 export function activate(context: vscode.ExtensionContext) {
-  let isActive = true;
-  let disposeTyping: vscode.Disposable;
-  let disposableAndClear: DisposableAndClear;
+  const ACTIVE_KEY = "antd-design-token-active-key";
+  const isActive = context.globalState.get(ACTIVE_KEY);
+  let disposeTyping: vscode.Disposable | undefined;
+  let disposableAndClear: DisposableAndClear | undefined;
 
-  setup();
+  if (isActive || isActive === undefined) {
+    setup();
+  }
 
   const disposable = vscode.commands.registerCommand(
     "antd-design-token.toggle",
     () => {
-      isActive = !isActive;
+      const isActive = context.globalState.get(ACTIVE_KEY);
+      context.globalState.update(ACTIVE_KEY, !isActive);
 
       if (isActive) {
+        disposeAll();
+        vscode.window.showInformationMessage(
+          "antd design token is inactive now."
+        );
+      } else {
         setup();
         vscode.window.showInformationMessage(
           "antd design token is active now."
-        );
-      } else {
-        disposeTyping.dispose();
-        disposableAndClear.disposable.forEach((disposable) =>
-          disposable.dispose()
-        );
-        disposableAndClear.clear();
-        vscode.window.showInformationMessage(
-          "antd design token is inactive now."
         );
       }
     }
@@ -43,8 +46,55 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    activeEditorListener(fullToken);
+
+    const isAntdProject = checkAntdProject();
+    if (isAntdProject) {
+      setupDecorationsAndCompletion(context, fullToken);
+    }
+  }
+
+  function setupDecorationsAndCompletion(
+    context: vscode.ExtensionContext,
+    fullToken: any
+  ) {
     disposeTyping = setupAntdTokenCompletion(fullToken);
-    disposableAndClear = setupEventListener(context, fullToken);
+    disposableAndClear = setupEventListenerAndDecorations(context, fullToken);
+  }
+
+  function disposeAll() {
+    if (disposeTyping) {
+      disposeTyping?.dispose();
+      disposeTyping = undefined;
+    }
+
+    if (disposableAndClear) {
+      disposableAndClear?.disposable?.forEach((disposable) =>
+        disposable?.dispose()
+      );
+      disposableAndClear?.clear();
+      disposableAndClear = undefined;
+    }
+  }
+
+  function activeEditorListener(fullToken: any) {
+    vscode.window.onDidChangeActiveTextEditor(
+      (editor) => {
+        if (editor) {
+          const isAntdProject = checkAntdProject();
+
+          if (isAntdProject) {
+            if (!disposeTyping && !disposableAndClear) {
+              setupDecorationsAndCompletion(context, fullToken);
+            }
+          } else {
+            disposeAll();
+          }
+        }
+      },
+      null,
+      context.subscriptions
+    );
   }
 }
 

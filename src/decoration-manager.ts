@@ -122,7 +122,7 @@ export default class DecorationManager {
     }
 
     fullTokenKeys.forEach((key: string) => {
-      const regEx = new RegExp(`\\b(${key})\\b(?!-)`, "g");
+      const regEx = new RegExp(`\\b(${key})\\b(?!-|:)`, "g");
       let match;
 
       while ((match = regEx.exec(text))) {
@@ -245,12 +245,8 @@ export default class DecorationManager {
   }
 
   clearAllFileDecorations() {
-    console.log(11111);
-    console.log(this);
-    console.log(this.fileDecorationMap);
     if (this.fileDecorationMap?.size) {
       this.fileDecorationMap.forEach((value, key) => {
-        console.log("key", key);
         this.clearFileDecoration(key);
       });
     }
