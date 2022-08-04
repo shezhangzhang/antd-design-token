@@ -1,12 +1,13 @@
 import * as vscode from "vscode";
 import DecorationManager from "./decoration-manager";
+import { checkAntdProject } from "./utils";
 
 export interface DisposableAndClear {
   disposable: vscode.Disposable[];
   clear: () => void;
 }
 
-export default function setupEventListener(
+export default function setupEventListenerAndDecorations(
   context: vscode.ExtensionContext,
   fullToken: any
 ): DisposableAndClear {
@@ -18,6 +19,7 @@ export default function setupEventListener(
   if (activeEditor) {
     fileLineCount = activeEditor.document.lineCount;
     decorationManager.setActiveEditor(activeEditor);
+    console.log(44444);
     decorationManager.triggerUpdateDecorations();
   }
 
@@ -60,6 +62,7 @@ export default function setupEventListener(
 
   const disposableActiveChange = vscode.window.onDidChangeActiveTextEditor(
     (editor) => {
+      console.log("change!!!!!");
       activeEditor = editor;
       if (editor) {
         fileLineCount = editor.document.lineCount || 0;

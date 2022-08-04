@@ -1,5 +1,7 @@
 import rgbHex from "rgb-hex";
-
+import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
 /**
  * Generate the MarkdownString for vscode.MarkdownString function
  * Note: should convert rgb color to hex
@@ -28,4 +30,34 @@ export function getColorTokenValue(value: string): string {
   }
 
   return result;
+}
+
+export function checkAntdProject(): boolean {
+  const projectPath = getProjectPath();
+  console.log("projectPath", projectPath);
+
+  if (projectPath) {
+    const pkgFilePath = path.join(projectPath, "/package.json");
+
+    if (fs.existsSync(pkgFilePath)) {
+      const packegeJson = fs.readFileSync(pkgFilePath);
+      if (
+        packegeJson.toString().includes("antd") ||
+        packegeJson.toString().includes("rc-")
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+export function getProjectPath(): string | undefined {
+  const fileName = vscode.window.activeTextEditor?.document?.fileName;
+  console.log("filename", fileName);
+
+  return vscode.workspace.workspaceFolders
+    ?.map((folder) => folder.uri.fsPath)
+    .filter((fsPath) => fileName?.startsWith(fsPath))[0];
 }
