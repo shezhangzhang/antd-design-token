@@ -17,12 +17,16 @@ export default function setupAntdTokenCompletion(
   const items: any[] | undefined = [];
 
   for (let key in fullToken) {
-    const value = String(fullToken[key as keyof typeof fullToken]);
+    let value = fullToken[key as keyof typeof fullToken];
     const item = new vscode.CompletionItem(`antd-${key}: ${value}`, 11);
     item.insertText = key.includes("-") ? `['${key}']` : key;
 
-    const sortValue = value.padStart(5, "0");
-    item.sortText = `a-${sortValue}-${key}`;
+    if (typeof value === "number") {
+      const sortValue = String(value).padStart(5, "0");
+      item.sortText = `a-${sortValue}-${key}`;
+    } else {
+      item.sortText = `a-${key}`;
+    }
 
     const colorSpan = genMarkdownString(value);
     let documentContent: vscode.MarkdownString | string = "";
