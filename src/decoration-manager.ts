@@ -206,12 +206,15 @@ export default class DecorationManager {
     const colorValue = getColorTokenValue(this.fullToken[key]);
     valueDecorations.push(decoration);
 
+    const themeFocusBorderColor = new vscode.ThemeColor("focusBorder");
     const decorationType = vscode.window.createTextEditorDecorationType({
       after: {
-        contentText: colorValue ? `**` : `${String(this.fullToken[key])}`,
+        contentText: colorValue ? "--" : `${String(this.fullToken[key])}`,
+        color: colorValue ? "transparent" : "#b37feb",
         backgroundColor: colorValue || "",
+        border: "2px solid",
+        borderColor: themeFocusBorderColor,
         margin: "0 0 0 5px;",
-        color: colorValue || "#b37feb",
         fontWeight: "bolder",
       },
     });
