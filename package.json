@@ -17,6 +17,16 @@
     "onStartupFinished"
   ],
   "contributes": {
+    "configuration": {
+      "title": "antd-design-token",
+      "properties": {
+        "antdDesignToken.themePath": {
+          "type": "string",
+          "default": "",
+          "description": "json theme path ,relative to workspace root"
+        }
+      }
+    },
     "commands": [
       {
         "command": "antd-design-token.toggle",

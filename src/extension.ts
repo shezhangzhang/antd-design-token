@@ -4,7 +4,7 @@ import setupEventListenerAndDecorations, {
   DisposableAndClear,
 } from "./listener";
 import setupAntdTokenCompletion from "./typing";
-import { checkAntdProject } from "./utils";
+import { checkAntdProject, getThemeConfig } from "./utils";
 
 export function activate(context: vscode.ExtensionContext) {
   let isActive = true;
@@ -38,7 +38,16 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
 
   function setup() {
-    const fullToken = getDesignToken();
+    let fullToken: any;
+
+    const themeConfig = getThemeConfig();
+    console.log({ themeConfig });
+
+    if (themeConfig) {
+      fullToken = getDesignToken(themeConfig);
+    } else {
+      fullToken = getDesignToken();
+    }
 
     if (!fullToken) {
       vscode.window.showErrorMessage("Failed to get antd fullToken.");
@@ -53,6 +62,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   }
 
+  vscode.workspace.onDidChangeConfiguration((event) => {
+    if (event.affectsConfiguration("antdDesignToken.themePath")) {
+      if (isActive) {
+        setup();
+      }
+    }
+  });
   function setupDecorationsAndCompletion(
     context: vscode.ExtensionContext,
     fullToken: any

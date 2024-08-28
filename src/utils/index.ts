@@ -59,3 +59,30 @@ export function getProjectPath(): string | undefined {
     ?.map((folder) => folder.uri.fsPath)
     .filter((fsPath) => fileName?.startsWith(fsPath))[0];
 }
+
+export function getThemeConfig() {
+  try {
+    const config = vscode.workspace.getConfiguration("antdDesignToken");
+    const themePath = config.get<string>("themePath") ?? "";
+    const extname = path.extname(themePath);
+    if (extname !== ".json") {
+      console.warn(`invalid theme path ${themePath}`);
+      return null;
+    }
+
+    let workspaceFolder =
+      vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath ?? "";
+    let themeFullPath;
+    if (path.isAbsolute(themePath)) {
+      themeFullPath = themePath;
+    } else {
+      themeFullPath = path.join(workspaceFolder, themePath);
+    }
+    const jsonStr = fs.readFileSync(themeFullPath, "utf-8");
+    const json = JSON.parse(jsonStr);
+    return json;
+  } catch (err) {
+    vscode.window.showInformationMessage("failed to get theme json ");
+    return null;
+  }
+}
